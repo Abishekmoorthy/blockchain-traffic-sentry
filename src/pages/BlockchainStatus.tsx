@@ -130,7 +130,6 @@ const BlockchainStatus = () => {
               <div className="text-4xl font-bold">{consensusLevel}%</div>
               <Progress 
                 value={consensusLevel} 
-                className="h-2 mt-2 w-full" 
                 className={cn(
                   "h-2 mt-2 w-full",
                   verificationStatus === "verified" ? "bg-green-500/20" : 

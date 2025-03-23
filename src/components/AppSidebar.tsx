@@ -74,7 +74,7 @@ const AppSidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex items-center justify-between px-3 py-4">
-            {!sidebar.collapsed && (
+            {sidebar.state !== "collapsed" && (
               <div className="flex items-center gap-2 px-2">
                 <ShieldAlert className="h-6 w-6 text-primary" />
                 <span className="font-medium">Traffic Security</span>
@@ -83,10 +83,10 @@ const AppSidebar = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => sidebar.setCollapsed(!sidebar.collapsed)}
+              onClick={() => sidebar.setOpen(!sidebar.open)}
               className="ml-auto"
             >
-              {sidebar.collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              {sidebar.state === "collapsed" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
           </div>
           <SidebarGroupContent>
@@ -113,7 +113,7 @@ const AppSidebar = () => {
       </SidebarContent>
       
       <SidebarFooter className="p-4">
-        {!sidebar.collapsed && (
+        {sidebar.state !== "collapsed" && (
           <div className="glass-card p-3 rounded-lg">
             <div className="text-xs text-muted-foreground">System Status</div>
             <div className="mt-2 flex items-center">
