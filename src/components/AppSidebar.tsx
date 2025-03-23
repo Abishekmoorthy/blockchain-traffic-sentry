@@ -18,7 +18,7 @@ import {
   SidebarMenu, 
   SidebarMenuButton, 
   SidebarMenuItem, 
-  useSidebarState 
+  useSidebar 
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "react-router-dom";
@@ -53,7 +53,7 @@ const menuItems = [
 ];
 
 const AppSidebar = () => {
-  const { collapsed, setCollapsed } = useSidebarState();
+  const { collapsed, setCollapsed } = useSidebar();
   const [mounted, setMounted] = useState(false);
 
   // Ensure hydration

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import BlockchainStatusCard from "@/components/blockchain/BlockchainStatus";
 import LineChart from "@/components/charts/LineChart";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface BlockData {
   id: string;
@@ -128,10 +128,15 @@ const BlockchainStatus = () => {
           <CardContent>
             <div className="flex flex-col items-center">
               <div className="text-4xl font-bold">{consensusLevel}%</div>
-              <Progress value={consensusLevel} className="h-2 mt-2 w-full" indicatorClassName={
-                verificationStatus === "verified" ? "bg-green-500" : 
-                verificationStatus === "warning" ? "bg-yellow-500" : "bg-red-500"
-              } />
+              <Progress 
+                value={consensusLevel} 
+                className="h-2 mt-2 w-full" 
+                className={cn(
+                  "h-2 mt-2 w-full",
+                  verificationStatus === "verified" ? "bg-green-500/20" : 
+                  verificationStatus === "warning" ? "bg-yellow-500/20" : "bg-red-500/20"
+                )}
+              />
               <div className="mt-4">
                 <Badge 
                   variant={verificationStatus === "verified" ? "default" : verificationStatus === "warning" ? "outline" : "destructive"}

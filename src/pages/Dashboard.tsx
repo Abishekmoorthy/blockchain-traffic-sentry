@@ -56,8 +56,8 @@ const Dashboard = () => {
     { id: "1030", timestamp: "10:15:45", transactions: 2, hash: "0x6124b7e99a7968a2d3a72e24635378c454a091282aaf5d4e3b4d4d4c4d57cd12", previousHash: "0x5a24b7e99a7968a2d3a72e24635378c454a091282aaf5d4e3b4d4d4c4d57cd78", nonce: 945 },
   ];
   
-  // Location data
-  const locationData = [
+  // Location data with proper typing
+  const locationData: { id: string; name: string; type: string; status: "active" | "warning" | "inactive" }[] = [
     { id: "1", name: "Junction A", type: "Traffic", status: "active" },
     { id: "2", name: "Junction B", type: "Traffic", status: "active" },
     { id: "3", name: "Control Room", type: "Admin", status: "active" },
