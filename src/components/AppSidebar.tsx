@@ -6,7 +6,8 @@ import {
   Blocks, 
   Settings, 
   ChevronRight, 
-  ChevronLeft 
+  ChevronLeft,
+  Cpu
 } from "lucide-react";
 import { 
   Sidebar, 
@@ -46,6 +47,11 @@ const menuItems = [
     icon: Blocks,
   },
   {
+    title: "IoT Components",
+    path: "/components",
+    icon: Cpu,
+  },
+  {
     title: "Settings",
     path: "/settings",
     icon: Settings,
@@ -53,7 +59,7 @@ const menuItems = [
 ];
 
 const AppSidebar = () => {
-  const { collapsed, setCollapsed } = useSidebar();
+  const sidebar = useSidebar();
   const [mounted, setMounted] = useState(false);
 
   // Ensure hydration
@@ -68,7 +74,7 @@ const AppSidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex items-center justify-between px-3 py-4">
-            {!collapsed && (
+            {!sidebar.collapsed && (
               <div className="flex items-center gap-2 px-2">
                 <ShieldAlert className="h-6 w-6 text-primary" />
                 <span className="font-medium">Traffic Security</span>
@@ -77,10 +83,10 @@ const AppSidebar = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => sidebar.setCollapsed(!sidebar.collapsed)}
               className="ml-auto"
             >
-              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              {sidebar.collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
           </div>
           <SidebarGroupContent>
@@ -107,7 +113,7 @@ const AppSidebar = () => {
       </SidebarContent>
       
       <SidebarFooter className="p-4">
-        {!collapsed && (
+        {!sidebar.collapsed && (
           <div className="glass-card p-3 rounded-lg">
             <div className="text-xs text-muted-foreground">System Status</div>
             <div className="mt-2 flex items-center">

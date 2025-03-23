@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import TrafficMonitoring from "./pages/TrafficMonitoring";
 import SecurityLogs from "./pages/SecurityLogs";
 import BlockchainStatus from "./pages/BlockchainStatus";
+import IoTComponents from "./pages/IoTComponents";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/traffic" element={<TrafficMonitoring />} />
               <Route path="/security" element={<SecurityLogs />} />
               <Route path="/blockchain" element={<BlockchainStatus />} />
+              <Route path="/components" element={<IoTComponents />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Route>
