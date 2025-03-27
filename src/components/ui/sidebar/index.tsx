@@ -2,7 +2,7 @@
 import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON, SIDEBAR_WIDTH_MOBILE } from "./constants"
-import { SidebarContext, SidebarProvider as OriginalSidebarProvider, useSidebar, type SidebarProviderProps } from "./context"
+import { SidebarContext, SidebarProvider as OriginalSidebarProvider, useSidebar } from "./context"
 import { 
   Sidebar, 
   SidebarTrigger, 
@@ -75,12 +75,13 @@ export {
 }
 
 // Export type separately when isolatedModules is enabled
-export type { SidebarProviderProps };
+// Use 'export type' syntax to fix the TypeScript error
+export type { SidebarProviderProps } from "./context";
 
 // Create a wrapped version of SidebarProvider that includes TooltipProvider
 const WrappedSidebarProvider = React.forwardRef<
   HTMLDivElement,
-  SidebarProviderProps
+  React.ComponentPropsWithoutRef<typeof OriginalSidebarProvider>
 >(({ children, className, style, ...props }, ref) => {
   return (
     <OriginalSidebarProvider 
