@@ -7,9 +7,7 @@ import {
   Settings, 
   ChevronRight, 
   ChevronLeft,
-  Cpu,
-  Wifi,
-  WifiOff
+  Cpu
 } from "lucide-react";
 import { 
   Sidebar, 
@@ -26,7 +24,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useRealTimeUpdates } from "@/services/realTimeService";
 
 const menuItems = [
   {
@@ -64,7 +61,6 @@ const menuItems = [
 const AppSidebar = () => {
   const sidebar = useSidebar();
   const [mounted, setMounted] = useState(false);
-  const { status: connectionStatus } = useRealTimeUpdates({});
 
   // Ensure hydration
   useEffect(() => {
@@ -123,23 +119,6 @@ const AppSidebar = () => {
             <div className="mt-2 flex items-center">
               <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
               <span className="text-sm">Blockchain Secure</span>
-            </div>
-            <div className="mt-2 flex items-center">
-              {connectionStatus === 'connected' ? (
-                <>
-                  <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                  <span className="text-sm flex items-center gap-1">
-                    <Wifi className="h-3 w-3" /> Live Data Active
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="flex h-2 w-2 rounded-full bg-yellow-500 mr-2"></span>
-                  <span className="text-sm flex items-center gap-1">
-                    <WifiOff className="h-3 w-3" /> Using Cached Data
-                  </span>
-                </>
-              )}
             </div>
           </div>
         )}

@@ -1,65 +1,51 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Car, AlertTriangle, ArrowRight, WifiOff } from "lucide-react";
+import { Activity, Car, AlertTriangle, ArrowRight } from "lucide-react";
 import LineChart from "@/components/charts/LineChart";
 import TrafficLightCard from "@/components/cards/TrafficLightCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useRealTimeUpdates, ConnectionStatus, setupMockWebSocket } from "@/services/realTimeService";
-import { Badge } from "@/components/ui/badge";
-
-interface TrafficData {
-  lane1: {
-    count: number;
-    secure: boolean;
-    history: number[];
-  };
-  lane2: {
-    count: number;
-    secure: boolean;
-    history: number[];
-  };
-  historicalData: any[];
-  timestamp?: string;
-}
 
 const TrafficMonitoring = () => {
-  const initialData: TrafficData = {
-    lane1: {
-      count: 22,
-      secure: true,
-      history: [15, 18, 22, 25, 22, 20, 22]
-    },
-    lane2: {
-      count: 18,
-      secure: false,
-      history: [10, 15, 12, 18, 20, 18, 18]
-    },
-    historicalData: []
-  };
+  const [lane1Data, setLane1Data] = useState({
+    count: 22,
+    secure: true,
+    history: [15, 18, 22, 25, 22, 20, 22]
+  });
   
-  const { data, status, sendMessage } = useRealTimeUpdates<TrafficData>(initialData);
+  const [lane2Data, setLane2Data] = useState({
+    count: 18,
+    secure: false,
+    history: [10, 15, 12, 18, 20, 18, 18]
+  });
+  
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
   
   useEffect(() => {
-    const cleanupMock = setupMockWebSocket();
-    
+    // Generate historical data
     const times = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-    const historicalData = times.map((time, index) => {
+    const data = times.map((time, index) => {
       const hour = parseInt(time.split(':')[0]);
       let lane1;
       let lane2;
       
+      // Create realistic traffic patterns (higher during rush hours)
       if (hour >= 7 && hour <= 9) {
+        // Morning rush
         lane1 = 20 + Math.floor(Math.random() * 10);
         lane2 = 15 + Math.floor(Math.random() * 10);
       } else if (hour >= 16 && hour <= 18) {
+        // Evening rush
         lane1 = 18 + Math.floor(Math.random() * 12);
         lane2 = 16 + Math.floor(Math.random() * 8);
       } else if (hour >= 22 || hour <= 5) {
+        // Late night/early morning
         lane1 = 3 + Math.floor(Math.random() * 7);
         lane2 = 2 + Math.floor(Math.random() * 5);
       } else {
+        // Regular day hours
         lane1 = 10 + Math.floor(Math.random() * 8);
         lane2 = 8 + Math.floor(Math.random() * 7);
       }
@@ -72,10 +58,11 @@ const TrafficMonitoring = () => {
       };
     });
     
-    sendMessage({ type: 'getHistoricalData' });
+    setHistoricalData(data);
     
-    if (!data.lane2.secure) {
-      const timer = setTimeout(() => {
+    // Simulate lane 2 tampering alert after delay
+    const timer = setTimeout(() => {
+      if (!lane2Data.secure) {
         toast.warning("Security Alert", {
           description: "Tampering detected in Lane 2 vehicle count. Blockchain verification failed.",
           action: {
@@ -83,26 +70,21 @@ const TrafficMonitoring = () => {
             onClick: () => console.log("Viewing tamper details"),
           },
         });
-      }, 3000);
-      
-      return () => clearTimeout(timer);
-    }
+      }
+    }, 3000);
     
-    return () => {
-      if (cleanupMock) cleanupMock();
-    };
-  }, [data.lane2.secure, sendMessage]);
+    return () => clearTimeout(timer);
+  }, []);
   
+  // Simulate an attack (for demo purposes)
   const simulateAttack = () => {
-    const newSecureState = !data.lane2.secure;
+    // Toggle lane 2 security status
+    setLane2Data(prev => ({
+      ...prev,
+      secure: !prev.secure
+    }));
     
-    sendMessage({ 
-      type: 'updateSecurity', 
-      lane: 'lane2', 
-      secure: newSecureState 
-    });
-    
-    if (data.lane2.secure) {
+    if (lane2Data.secure) {
       toast.error("Lane 2 under attack", {
         description: "Unauthorized modification of vehicle count detected.",
         action: {
@@ -123,39 +105,16 @@ const TrafficMonitoring = () => {
     { dataKey: "total", color: "#94a3b8", name: "Total" }
   ];
 
-  const getStatusBadge = (status: ConnectionStatus) => {
-    switch (status) {
-      case 'connected':
-        return { variant: 'success', label: 'Live', icon: Activity };
-      case 'connecting':
-        return { variant: 'warning', label: 'Connecting...', icon: Activity };
-      case 'disconnected':
-        return { variant: 'secondary', label: 'Offline', icon: WifiOff };
-      case 'error':
-        return { variant: 'destructive', label: 'Connection Error', icon: AlertTriangle };
-      default:
-        return { variant: 'secondary', label: 'Unknown', icon: WifiOff };
-    }
-  };
-  
-  const statusBadge = getStatusBadge(status);
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">Traffic Monitoring</h1>
-          <Badge variant={statusBadge.variant as any} className="ml-2">
-            <statusBadge.icon className="h-3 w-3 mr-1" />
-            {statusBadge.label}
-          </Badge>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Traffic Monitoring</h1>
         <Button 
-          variant={data.lane2.secure ? "destructive" : "default"} 
+          variant={lane2Data.secure ? "destructive" : "default"} 
           onClick={simulateAttack}
           className="flex items-center gap-2"
         >
-          {data.lane2.secure ? (
+          {lane2Data.secure ? (
             <>
               <AlertTriangle className="h-4 w-4" /> 
               Simulate Attack
@@ -173,15 +132,15 @@ const TrafficMonitoring = () => {
         <TrafficLightCard 
           id="lane1-detailed" 
           title="Lane 1 Traffic Light" 
-          vehicleCount={data.lane1.count} 
-          secure={data.lane1.secure}
+          vehicleCount={lane1Data.count} 
+          secure={lane1Data.secure}
           className="h-full"
         />
         <TrafficLightCard 
           id="lane2-detailed" 
           title="Lane 2 Traffic Light" 
-          vehicleCount={data.lane2.count} 
-          secure={data.lane2.secure}
+          vehicleCount={lane2Data.count} 
+          secure={lane2Data.secure}
           className="h-full"
         />
       </div>
@@ -194,7 +153,7 @@ const TrafficMonitoring = () => {
         </TabsList>
         <TabsContent value="hourly" className="mt-4">
           <LineChart 
-            data={data.historicalData}
+            data={historicalData}
             lines={trafficLines}
             title="Today's Traffic Flow"
             description="Vehicle count by lane per hour"
@@ -204,7 +163,7 @@ const TrafficMonitoring = () => {
         </TabsContent>
         <TabsContent value="daily" className="mt-4">
           <LineChart 
-            data={data.historicalData.filter((_, i) => i % 3 === 0).map(item => ({
+            data={historicalData.filter((_, i) => i % 3 === 0).map(item => ({
               ...item,
               timestamp: `Day ${Math.floor(Math.random() * 30) + 1}`
             }))}
@@ -217,7 +176,7 @@ const TrafficMonitoring = () => {
         </TabsContent>
         <TabsContent value="weekly" className="mt-4">
           <LineChart 
-            data={data.historicalData.filter((_, i) => i % 6 === 0).map(item => ({
+            data={historicalData.filter((_, i) => i % 6 === 0).map(item => ({
               ...item,
               timestamp: `Week ${Math.floor(Math.random() * 4) + 1}`
             }))}
