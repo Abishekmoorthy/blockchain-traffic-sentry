@@ -1,7 +1,8 @@
 
+import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON, SIDEBAR_WIDTH_MOBILE } from "./constants"
-import { SidebarContext, SidebarProvider, useSidebar, type SidebarProviderProps } from "./context"
+import { SidebarContext, SidebarProvider as OriginalSidebarProvider, useSidebar, type SidebarProviderProps } from "./context"
 import { 
   Sidebar, 
   SidebarTrigger, 
@@ -43,7 +44,6 @@ export {
   SIDEBAR_WIDTH_ICON,
   // Context
   SidebarContext,
-  SidebarProvider,
   useSidebar,
   // Core components
   Sidebar,
@@ -72,9 +72,10 @@ export {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  // Types
-  type SidebarProviderProps
 }
+
+// Export type separately when isolatedModules is enabled
+export type { SidebarProviderProps }
 
 // Create a wrapped version of SidebarProvider that includes TooltipProvider
 const WrappedSidebarProvider = React.forwardRef<
@@ -82,7 +83,7 @@ const WrappedSidebarProvider = React.forwardRef<
   SidebarProviderProps
 >(({ children, className, style, ...props }, ref) => {
   return (
-    <SidebarProvider 
+    <OriginalSidebarProvider 
       ref={ref}
       className={className}
       style={{
@@ -97,10 +98,10 @@ const WrappedSidebarProvider = React.forwardRef<
           {children}
         </div>
       </TooltipProvider>
-    </SidebarProvider>
+    </OriginalSidebarProvider>
   )
 })
 WrappedSidebarProvider.displayName = "SidebarProvider"
 
-// Replace the original export with the wrapped version
+// Export the wrapped version as SidebarProvider
 export { WrappedSidebarProvider as SidebarProvider }
