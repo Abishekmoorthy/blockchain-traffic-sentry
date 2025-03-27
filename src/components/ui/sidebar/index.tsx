@@ -75,7 +75,7 @@ export {
 }
 
 // Export type separately when isolatedModules is enabled
-export type { SidebarProviderProps }
+export type { SidebarProviderProps };
 
 // Create a wrapped version of SidebarProvider that includes TooltipProvider
 const WrappedSidebarProvider = React.forwardRef<
