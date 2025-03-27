@@ -7,7 +7,8 @@ import {
   Settings, 
   ChevronRight, 
   ChevronLeft,
-  Cpu
+  Cpu,
+  BarChart2
 } from "lucide-react";
 import { 
   Sidebar, 
@@ -50,6 +51,11 @@ const menuItems = [
     title: "IoT Components",
     path: "/components",
     icon: Cpu,
+  },
+  {
+    title: "Predictive Models",
+    path: "/models",
+    icon: BarChart2,
   },
   {
     title: "Settings",
