@@ -75,7 +75,6 @@ export {
 }
 
 // Export type separately when isolatedModules is enabled
-// Use 'export type' syntax to fix the TypeScript error
 export type { SidebarProviderProps } from "./context";
 
 // Create a wrapped version of SidebarProvider that includes TooltipProvider
