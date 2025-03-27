@@ -1,102 +1,34 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Car, AlertTriangle, ArrowRight } from "lucide-react";
+import { Activity, Car, AlertTriangle, ArrowRight, RefreshCw } from "lucide-react";
 import LineChart from "@/components/charts/LineChart";
 import TrafficLightCard from "@/components/cards/TrafficLightCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTraffic } from "@/contexts/TrafficContext";
 
 const TrafficMonitoring = () => {
-  const [lane1Data, setLane1Data] = useState({
-    count: 22,
-    secure: true,
-    history: [15, 18, 22, 25, 22, 20, 22]
-  });
-  
-  const [lane2Data, setLane2Data] = useState({
-    count: 18,
-    secure: false,
-    history: [10, 15, 12, 18, 20, 18, 18]
-  });
-  
-  const [historicalData, setHistoricalData] = useState<any[]>([]);
-  
-  useEffect(() => {
-    // Generate historical data
-    const times = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-    const data = times.map((time, index) => {
-      const hour = parseInt(time.split(':')[0]);
-      let lane1;
-      let lane2;
-      
-      // Create realistic traffic patterns (higher during rush hours)
-      if (hour >= 7 && hour <= 9) {
-        // Morning rush
-        lane1 = 20 + Math.floor(Math.random() * 10);
-        lane2 = 15 + Math.floor(Math.random() * 10);
-      } else if (hour >= 16 && hour <= 18) {
-        // Evening rush
-        lane1 = 18 + Math.floor(Math.random() * 12);
-        lane2 = 16 + Math.floor(Math.random() * 8);
-      } else if (hour >= 22 || hour <= 5) {
-        // Late night/early morning
-        lane1 = 3 + Math.floor(Math.random() * 7);
-        lane2 = 2 + Math.floor(Math.random() * 5);
-      } else {
-        // Regular day hours
-        lane1 = 10 + Math.floor(Math.random() * 8);
-        lane2 = 8 + Math.floor(Math.random() * 7);
-      }
-      
-      return {
-        timestamp: time,
-        lane1,
-        lane2,
-        total: lane1 + lane2
-      };
-    });
-    
-    setHistoricalData(data);
-    
-    // Simulate lane 2 tampering alert after delay
-    const timer = setTimeout(() => {
-      if (!lane2Data.secure) {
-        toast.warning("Security Alert", {
-          description: "Tampering detected in Lane 2 vehicle count. Blockchain verification failed.",
-          action: {
-            label: "View Details",
-            onClick: () => console.log("Viewing tamper details"),
-          },
-        });
-      }
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  const { 
+    lane1, 
+    lane2, 
+    trafficData, 
+    lastAttack, 
+    connected, 
+    refreshData
+  } = useTraffic();
   
   // Simulate an attack (for demo purposes)
   const simulateAttack = () => {
-    // Toggle lane 2 security status
-    setLane2Data(prev => ({
-      ...prev,
-      secure: !prev.secure
-    }));
-    
-    if (lane2Data.secure) {
-      toast.error("Lane 2 under attack", {
-        description: "Unauthorized modification of vehicle count detected.",
-        action: {
-          label: "Verify Blockchain",
-          onClick: () => console.log("Verifying blockchain"),
-        },
-      });
-    } else {
-      toast.success("Lane 2 secured", {
-        description: "Blockchain verification restored and vehicle count validated.",
-      });
-    }
+    // This is just for demo purposes - actually attacks would be detected by the system
+    toast.warning("Security Alert", {
+      description: "Simulated attack on Lane 2 traffic sensor.",
+      action: {
+        label: "View Details",
+        onClick: () => console.log("Viewing tamper details"),
+      },
+    });
   };
 
   const trafficLines = [
@@ -104,43 +36,76 @@ const TrafficMonitoring = () => {
     { dataKey: "lane2", color: "#c084fc", name: "Lane 2" },
     { dataKey: "total", color: "#94a3b8", name: "Total" }
   ];
+  
+  // Create derived hourly/daily/weekly data
+  const dailyData = trafficData
+    .filter((_, i) => i % 3 === 0)
+    .map((item, idx) => ({
+      ...item,
+      timestamp: `Day ${idx + 1}`
+    }));
+    
+  const weeklyData = trafficData
+    .filter((_, i) => i % 6 === 0)
+    .map((item, idx) => ({
+      ...item,
+      timestamp: `Week ${idx + 1}`
+    }));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Traffic Monitoring</h1>
-        <Button 
-          variant={lane2Data.secure ? "destructive" : "default"} 
-          onClick={simulateAttack}
-          className="flex items-center gap-2"
-        >
-          {lane2Data.secure ? (
-            <>
-              <AlertTriangle className="h-4 w-4" /> 
-              Simulate Attack
-            </>
-          ) : (
-            <>
-              <Activity className="h-4 w-4" /> 
-              Restore Security
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant={lane2.secured ? "destructive" : "default"} 
+            onClick={simulateAttack}
+            className="flex items-center gap-2"
+          >
+            {lane2.secured ? (
+              <>
+                <AlertTriangle className="h-4 w-4" /> 
+                Simulate Attack
+              </>
+            ) : (
+              <>
+                <Activity className="h-4 w-4" /> 
+                Restore Security
+              </>
+            )}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={refreshData}
+            title="Refresh Data"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+          
+          <div className="flex items-center gap-2 ml-2">
+            <span className={`h-2 w-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}></span>
+            <span className="text-sm">{connected ? "Live" : "Offline"}</span>
+          </div>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TrafficLightCard 
           id="lane1-detailed" 
           title="Lane 1 Traffic Light" 
-          vehicleCount={lane1Data.count} 
-          secure={lane1Data.secure}
+          vehicleCount={lane1.vehicleCount} 
+          secure={lane1.secured}
+          lightState={lane1.lightState}
           className="h-full"
         />
         <TrafficLightCard 
           id="lane2-detailed" 
           title="Lane 2 Traffic Light" 
-          vehicleCount={lane2Data.count} 
-          secure={lane2Data.secure}
+          vehicleCount={lane2.vehicleCount} 
+          secure={lane2.secured}
+          lightState={lane2.lightState}
           className="h-full"
         />
       </div>
@@ -153,7 +118,7 @@ const TrafficMonitoring = () => {
         </TabsList>
         <TabsContent value="hourly" className="mt-4">
           <LineChart 
-            data={historicalData}
+            data={trafficData}
             lines={trafficLines}
             title="Today's Traffic Flow"
             description="Vehicle count by lane per hour"
@@ -163,10 +128,7 @@ const TrafficMonitoring = () => {
         </TabsContent>
         <TabsContent value="daily" className="mt-4">
           <LineChart 
-            data={historicalData.filter((_, i) => i % 3 === 0).map(item => ({
-              ...item,
-              timestamp: `Day ${Math.floor(Math.random() * 30) + 1}`
-            }))}
+            data={dailyData}
             lines={trafficLines}
             title="Daily Traffic Flow"
             description="Average vehicle count by lane per day"
@@ -176,10 +138,7 @@ const TrafficMonitoring = () => {
         </TabsContent>
         <TabsContent value="weekly" className="mt-4">
           <LineChart 
-            data={historicalData.filter((_, i) => i % 6 === 0).map(item => ({
-              ...item,
-              timestamp: `Week ${Math.floor(Math.random() * 4) + 1}`
-            }))}
+            data={weeklyData}
             lines={trafficLines}
             title="Weekly Traffic Flow"
             description="Average vehicle count by lane per week"
@@ -206,16 +165,7 @@ const TrafficMonitoring = () => {
                 <div className="light-green active w-10 h-10"></div>
                 <div className="flex-1">
                   <div className="text-sm font-medium">Green Light</div>
-                  <div className="text-xs text-muted-foreground">Activated when vehicle count &lt; 10</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-              
-              <div className="flex items-center gap-4 p-3 bg-secondary/30 rounded-lg">
-                <div className="light-yellow active w-10 h-10"></div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium">Yellow Light</div>
-                  <div className="text-xs text-muted-foreground">Activated when 10 ≤ vehicle count &lt; 20</div>
+                  <div className="text-xs text-muted-foreground">Activated on lane with fewer vehicles</div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -224,9 +174,17 @@ const TrafficMonitoring = () => {
                 <div className="light-red active w-10 h-10"></div>
                 <div className="flex-1">
                   <div className="text-sm font-medium">Red Light</div>
-                  <div className="text-xs text-muted-foreground">Activated when vehicle count ≥ 20</div>
+                  <div className="text-xs text-muted-foreground">Activated on lane with more vehicles</div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+              
+              <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg mt-4">
+                <div className="text-sm font-medium">Current Traffic Rule</div>
+                <div className="text-xs mt-1">
+                  If Lane 1 ({lane1.vehicleCount} vehicles) has more traffic than Lane 2 ({lane2.vehicleCount} vehicles), 
+                  Lane 1 gets the green light and Lane 2 gets the red light, and vice versa.
+                </div>
               </div>
             </div>
           </CardContent>
@@ -273,6 +231,18 @@ const TrafficMonitoring = () => {
                   Flooding the system with traffic to prevent legitimate sensor data from being processed.
                 </div>
               </div>
+              
+              {lastAttack && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mt-2">
+                  <div className="text-sm font-medium text-red-500">Latest Attack Detected</div>
+                  <div className="text-xs mt-1">
+                    <span className="font-medium">{lastAttack.category}:</span> {lastAttack.description}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {lastAttack.timestamp}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

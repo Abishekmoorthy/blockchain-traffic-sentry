@@ -24,6 +24,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTraffic } from "@/contexts/TrafficContext";
+import { Badge } from "@/components/ui/badge";
 
 const menuItems = [
   {
@@ -61,6 +63,7 @@ const menuItems = [
 const AppSidebar = () => {
   const sidebar = useSidebar();
   const [mounted, setMounted] = useState(false);
+  const { connected } = useTraffic();
 
   // Ensure hydration
   useEffect(() => {
@@ -74,7 +77,7 @@ const AppSidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex items-center justify-between px-3 py-4">
-            {!sidebar.collapsed && (
+            {!sidebar.isCollapsed && (
               <div className="flex items-center gap-2 px-2">
                 <ShieldAlert className="h-6 w-6 text-primary" />
                 <span className="font-medium">Traffic Security</span>
@@ -83,10 +86,10 @@ const AppSidebar = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => sidebar.setCollapsed(!sidebar.collapsed)}
+              onClick={() => sidebar.setCollapsed(!sidebar.isCollapsed)}
               className="ml-auto"
             >
-              {sidebar.collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              {sidebar.isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
           </div>
           <SidebarGroupContent>
@@ -113,12 +116,12 @@ const AppSidebar = () => {
       </SidebarContent>
       
       <SidebarFooter className="p-4">
-        {!sidebar.collapsed && (
+        {!sidebar.isCollapsed && (
           <div className="glass-card p-3 rounded-lg">
             <div className="text-xs text-muted-foreground">System Status</div>
             <div className="mt-2 flex items-center">
-              <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-              <span className="text-sm">Blockchain Secure</span>
+              <span className={`flex h-2 w-2 rounded-full mr-2 ${connected ? "bg-green-500" : "bg-red-500"}`}></span>
+              <span className="text-sm">{connected ? "Connected" : "Disconnected"}</span>
             </div>
           </div>
         )}

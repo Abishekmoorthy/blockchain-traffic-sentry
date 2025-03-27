@@ -1,14 +1,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Lock, Unlock, ShieldAlert } from "lucide-react";
+import { Lock, Unlock, ShieldAlert, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 interface TrafficLightCardProps {
   id: string;
   title: string;
   vehicleCount: number;
   secure: boolean;
+  lightState: 'red' | 'yellow' | 'green';
   className?: string;
 }
 
@@ -17,35 +19,24 @@ const TrafficLightCard = ({
   title,
   vehicleCount,
   secure,
+  lightState,
   className,
 }: TrafficLightCardProps) => {
-  const [lightState, setLightState] = useState<'red' | 'yellow' | 'green'>();
-
-  useEffect(() => {
-    // Logic to determine traffic light color based on vehicle count
-    if (vehicleCount < 10) {
-      setLightState('green');
-    } else if (vehicleCount < 20) {
-      setLightState('yellow');
-    } else {
-      setLightState('red');
-    }
-  }, [vehicleCount]);
-
   return (
     <Card className={cn("glass-card border overflow-hidden", className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className={cn(
-          "p-1.5 rounded-full flex items-center",
-          secure 
-            ? "bg-green-500/10 text-green-500 border border-green-500/30" 
-            : "bg-red-500/10 text-red-500 border border-red-500/30"
-        )}>
-          {secure 
-            ? <Lock className="h-3.5 w-3.5" /> 
-            : <ShieldAlert className="h-3.5 w-3.5" />
-          }
+        <div className="flex items-center gap-2">
+          <Badge 
+            variant={secure ? "default" : "destructive"}
+            className="flex items-center gap-1 px-2 py-1"
+          >
+            {secure 
+              ? <Lock className="h-3 w-3" /> 
+              : <AlertCircle className="h-3 w-3" />
+            }
+            <span>{secure ? "Secure" : "Alert"}</span>
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
